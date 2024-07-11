@@ -16,6 +16,10 @@ beforeAll(async () => {
   });
 });
 
+beforeEach(async () => {
+  await mongoose.connection.db.dropDatabase();
+});
+
 afterAll(async () => {
   await mongoose.connection.dropDatabase();
   await mongoose.connection.close();
@@ -131,6 +135,7 @@ describe("API Tests", () => {
     });
 
     it("should handle AI errors gracefully", async () => {
+      const aiService = require("../src/services/aiService"); // Adjust the path as needed
       jest.spyOn(aiService, "generateQuestion").mockImplementation(() => {
         throw new Error("AI service error");
       });
