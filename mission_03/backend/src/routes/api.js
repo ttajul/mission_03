@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/user"); // Adjust the path as needed
+const aiService = require("../services/aiservice.js"); // Ensure this path is correct
 
 // Define your routes here
 router.post("/register", async (req, res) => {
@@ -27,7 +28,6 @@ router.post("/login", async (req, res) => {
   if (!isMatch) {
     return res.status(401).send({ message: "Invalid credentials" });
   }
-  // Continue with generating token, etc.
   res.send({ message: "Login successful", token: "your-token" });
 });
 

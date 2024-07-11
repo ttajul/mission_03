@@ -60,7 +60,7 @@ describe("API Tests", () => {
 
       expect(res.status).toBe(400);
       expect(res.body.message).toBe(
-        "User validation failed: email: Validator failed for path `email` with value `invalidemail`"
+        "User validation failed: email: Please fill a valid email address"
       );
     });
   });
@@ -85,6 +85,13 @@ describe("API Tests", () => {
     });
 
     it("should not log in a user with incorrect password", async () => {
+      const user = new User({
+        username: "testuser",
+        email: "testuser@example.com",
+        password: "password123",
+      });
+      await user.save();
+
       const res = await request(app).post("/api/login").send({
         email: "testuser@example.com",
         password: "wrongpassword",
@@ -135,7 +142,7 @@ describe("API Tests", () => {
     });
 
     it("should handle AI errors gracefully", async () => {
-      const aiService = require("../src/services/aiService"); // Adjust the path as needed
+      const aiService = require("../src/services/aiservice.js"); // Adjust the path as needed
       jest.spyOn(aiService, "generateQuestion").mockImplementation(() => {
         throw new Error("AI service error");
       });
