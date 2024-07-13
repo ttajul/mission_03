@@ -20,6 +20,11 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
+//AI initialization
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+// Access your API key as an environment variable (see "Set up your API key" above)
+const genAI = new GoogleGenerativeAI(process.env.API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash"});
 
 // Database connection
 if (process.env.NODE_ENV !== "test") {
@@ -34,4 +39,15 @@ app.listen(PORT, () => {
   console.log(`Server is running on port http://localhost:${PORT}`);
 });
 
+async function run() {
+  const prompt = "Write a story about a AI and magic"
+
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+  const text = response.text();
+  console.log(text);
+}
+
+run();
 module.exports = app;
+
