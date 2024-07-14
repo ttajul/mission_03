@@ -25,13 +25,6 @@ app.get("/", (req, res) => {
 
 app.use('/api/ai', aiRoutes); 
 
-// Database connection
-if (process.env.NODE_ENV !== "test") {
-  mongoose.connect("mongodb://localhost:27017/yourdbname", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
-}
 
 
 
