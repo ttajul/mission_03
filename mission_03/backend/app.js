@@ -1,6 +1,6 @@
 const express = require("express");
-const mongoose = require("mongoose");
-const apiRoutes = require("./routes/api");
+
+const apiRoutes = require("./src/routes/aiRoutes");
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const app = express();
@@ -35,4 +35,4 @@ app.listen(PORT, () => {
   console.log(`Server is running on port http://localhost:${PORT}`);
 });
 
-export default app;
+module.exports = app;
