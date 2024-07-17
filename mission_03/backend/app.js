@@ -1,6 +1,8 @@
 const express = require("express");
 
-const apiRoutes = require("./src/routes/aiRoutes");
+
+const aiRoutes = require("./src/routes/aiRoutes");
+
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const app = express();
@@ -16,7 +18,7 @@ const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 // Middleware
 app.use(express.json());
-app.use("/api", apiRoutes);
+app.use("/api", aiRoutes);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
