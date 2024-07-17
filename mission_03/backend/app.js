@@ -9,7 +9,7 @@ const WebSocket = require('ws');
 const wss = new WebSocket.Server({ port:8080 });
 
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-require('dotenv').config(); // Load environment variables
+
 
 const genAI = new GoogleGenerativeAI(process.env.API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
