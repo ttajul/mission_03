@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+import { useEffect, useState } from "react";
+=======
 import { useState } from "react";
+>>>>>>> main
 import "../styles/chatbot.css";
 
 const Chatbot = () => {
