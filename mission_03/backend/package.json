@@ -1,0 +1,27 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Backend for Mission 3 project",
+  "main": "src/app.js",
+  "scripts": {
+    "test": "jest",
+    "start": "node src/app.js"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.24.7",
+    "cross-env": "^7.0.3",
+    "jest": "^29.7.0",
+    "mongodb-memory-server": "^9.4.0",
+    "supertest": "^7.0.0"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.14.1",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongoose": "^5.10.0",
+    "node": "^18.20.4",
+    "ws": "^8.18.0"
+  }
+}

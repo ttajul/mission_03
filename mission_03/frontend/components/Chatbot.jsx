@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { useEffect, useState } from "react";
+=======
+import { useState } from "react";
+>>>>>>> main
 import "../styles/chatbot.css";
 
 const Chatbot = () => {
@@ -6,10 +10,9 @@ const Chatbot = () => {
   const [input, setInput] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const sendMessage = async (e) => {
+  const sendMessage = (e) => {
     e.preventDefault();
-    if (!input.trim()) return; //prevent sending empty messages
-
+    if (!input.trim()) return;
     const newMessage = {
       id: messages.length + 1,
       text: input,
@@ -19,21 +22,6 @@ const Chatbot = () => {
     setInput("");
 
     // Here you could also integrate with a backend service to get a response
-
-    try {
-      const response = await fetch("http://localhost:5000/chatbot", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ message: input }),
-      });
-      if (!response.ok) {
-        throw new Error("Failed to send message");
-      }
-    } catch (err) {
-      console.error(err);
-    }
   };
 
   const toggleChatbot = () => {

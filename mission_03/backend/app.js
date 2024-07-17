@@ -1,11 +1,25 @@
 const express = require("express");
-
-
+const mongoose = require("mongoose");
+const apiRoutes = require("./routes/api");
+const bodyParser = require('body-parser');
+const cors = require('cors');
 const app = express();
+require('dotenv').config();
+const WebSocket = require('ws');
+const wss = new WebSocket.Server({ port:8080 });
+
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+require('dotenv').config(); // Load environment variables
+
+const genAI = new GoogleGenerativeAI(process.env.API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 // Middleware
 app.use(express.json());
 app.use("/api", apiRoutes);
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors());
 
 // Database connection
 /*if (process.env.NODE_ENV !== "test") {
