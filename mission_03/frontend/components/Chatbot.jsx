@@ -1,14 +1,41 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../styles/chatbot.css";
 
 const Chatbot = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
+  const [ws, setWs] = useState(null);
+
+  useEffect(() => {
+    const websocket = new WebSocket("ws://localhost:8082"); // Updated WebSocket port
+    setWs(websocket);
+
+    websocket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.question) {
+        const newMessage = {
+          id: messages.length + 1,
+          text: data.question,
+          sender: "bot",
+        };
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+      }
+    };
+
+    websocket.onclose = () => {
+      console.log("WebSocket connection closed");
+    };
+
+    return () => {
+      websocket.close();
+    };
+  }, []);
 
   const sendMessage = (e) => {
     e.preventDefault();
     if (!input.trim()) return;
+
     const newMessage = {
       id: messages.length + 1,
       text: input,
@@ -17,7 +44,11 @@ const Chatbot = () => {
     setMessages([...messages, newMessage]);
     setInput("");
 
-    // Here you could also integrate with a backend service to get a response
+    if (ws) {
+      const jobTitle = "Software Engineer"; // Replace with actual values
+      const company = "Example Tech Inc."; // Replace with actual values
+      ws.send(JSON.stringify({ jobTitle, company, answer: input }));
+    }
   };
 
   const toggleChatbot = () => {
@@ -39,7 +70,7 @@ const Chatbot = () => {
       )}
 
       {isExpanded && (
-        <div className="chatbot-container expanded">
+        <div id="chatbot-container" className="chatbot-container expanded">
           <div className="chat-header">
             <span>Chat with us!</span>
             <div className="control-buttons">

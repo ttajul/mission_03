@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>WebSocket Test</title>
+  </head>
+  <body>
+    <div id="status">Connecting...</div>
+    <input type="text" id="messageInput" placeholder="Type a message" />
+    <button onclick="sendMessage()">Send</button>
+    <div id="messages"></div>
+
+    <script>
+      let ws;
+
+      function connect() {
+        ws = new WebSocket("ws://localhost:8097"); // Ensure this port matches your WebSocket server port
+
+        ws.onopen = () => {
+          document.getElementById("status").innerText = "Connected";
+        };
+
+        ws.onmessage = (event) => {
+          const messageContainer = document.getElementById("messages");
+          const newMessage = document.createElement("div");
+          newMessage.innerText = "Received: " + event.data;
+          messageContainer.appendChild(newMessage);
+        };
+
+        ws.onclose = () => {
+          document.getElementById("status").innerText =
+            "Disconnected. Reconnecting...";
+          setTimeout(connect, 1000); // Attempt to reconnect after 1 second
+        };
+
+        ws.onerror = (error) => {
+          console.error("WebSocket error:", error);
+        };
+      }
+
+      function sendMessage() {
+        const input = document.getElementById("messageInput");
+        const message = input.value;
+        const jsonMessage = JSON.stringify({
+          jobTitle: "Engineer",
+          company: "Tech Co",
+          answer: message,
+        });
+
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(jsonMessage);
+          input.value = "";
+
+          const messageContainer = document.getElementById("messages");
+          const newMessage = document.createElement("div");
+          newMessage.innerText = "Sent: " + jsonMessage;
+          messageContainer.appendChild(newMessage);
+        } else {
+          console.error("WebSocket is not open. ReadyState: " + ws.readyState);
+        }
+      }
+
+      // Establish the WebSocket connection
+      connect();
+    </script>
+  </body>
+</html>
