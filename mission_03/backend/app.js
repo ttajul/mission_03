@@ -17,6 +17,11 @@ app.use(cors());
 const aiRoutes = require("./src/routes/aiRoutes");
 app.use("/api", aiRoutes);
 
+//main route
+app.get("/", (req, res) => {
+  res.send("Welcome to the AI Interview Questions API");
+});
+
 const PORT = 3000; // Ensure this is set to 3000
 app.listen(PORT, () => {
   console.log(`Server is running on port http://localhost:${PORT}`);
