@@ -1,32 +1,84 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../styles/chatbot.css";
 
 const Chatbot = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
+  const [ws, setWs] = useState(null);
+
+  useEffect(() => {
+    const websocket = new WebSocket("ws://localhost:8098");
+    setWs(websocket);
+
+    websocket.onopen = () => {
+      console.log("WebSocket connection established");
+    };
+
+    websocket.onmessage = (event) => {
+      console.log("Received data:", event.data);
+      try {
+        const data = JSON.parse(event.data);
+        if (data.question) {
+          const newMessage = {
+            id: messages.length + 1,
+            text: data.question,
+            sender: "bot",
+          };
+          console.log("Adding new message to state: ", newMessage);
+          setMessages((prevMessages) => [...prevMessages, newMessage]);
+        }
+      } catch (error) {
+        console.error("Error parsing message data:", error);
+      }
+    };
+
+    websocket.onclose = () => {
+      console.log("WebSocket connection closed");
+    };
+
+    websocket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    return () => {
+      websocket.close();
+    };
+  }, [messages.length]);
 
   const sendMessage = (e) => {
     e.preventDefault();
     if (!input.trim()) return;
+
     const newMessage = {
       id: messages.length + 1,
       text: input,
       sender: "user",
     };
+    console.log("Sending new message to state: ", newMessage);
     setMessages([...messages, newMessage]);
     setInput("");
 
-    // Here you could also integrate with a backend service to get a response
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      const jobTitle = "Software Engineer"; // Replace with actual values
+      const company = "Example Tech Inc."; // Replace with actual values
+      const message = { jobTitle, company, answer: input };
+      console.log("Sending message:", message);
+      ws.send(JSON.stringify(message));
+    } else {
+      console.error("WebSocket is not open. ReadyState: " + ws.readyState);
+    }
   };
 
   const toggleChatbot = () => {
     setIsExpanded(!isExpanded);
     const chatbot = document.getElementById("chatbot-container");
-    if (isExpanded) {
-      chatbot.classList.remove("expanded");
-    } else {
-      chatbot.classList.add("expanded");
+    if (chatbot) {
+      if (isExpanded) {
+        chatbot.classList.remove("expanded");
+      } else {
+        chatbot.classList.add("expanded");
+      }
     }
   };
 
@@ -39,7 +91,7 @@ const Chatbot = () => {
       )}
 
       {isExpanded && (
-        <div className="chatbot-container expanded">
+        <div id="chatbot-container" className="chatbot-container expanded">
           <div className="chat-header">
             <span>Chat with us!</span>
             <div className="control-buttons">
@@ -52,7 +104,6 @@ const Chatbot = () => {
             <p>Job Title:</p>
             <input type="text" placeholder="Enter your job name..." />
           </div>
-          {/* Render messages and input field for new messages here */}
           <div className="messages-container">
             {messages.map((msg) => (
               <div key={msg.id} className={`message ${msg.sender}`}>
