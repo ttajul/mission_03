@@ -59,6 +59,8 @@ const wss = new WebSocket.Server({ port: wssPort });
 wss.on("connection", (ws) => {
   console.log("WebSocket connection established");
 
+  let interviewContext = []; // Store the context of the interview
+
   ws.on("message", async (message) => {
     console.log("Received message:", message);
 
@@ -66,9 +68,21 @@ wss.on("connection", (ws) => {
       const data = JSON.parse(message);
       const { jobTitle, company, answer } = data;
 
-      const generatedQuestion = `Based on your input for the ${jobTitle} at ${company}, here is a new question.`;
-      const response = { question: generatedQuestion };
-      console.log("Sending response:", response); // Log the response before sending
+      // Add the user's answer to the context
+      interviewContext.push(`Answer: ${answer}`);
+
+      // Generate the new question
+      const prompt = `You are interviewing for a ${jobTitle} position at ${company}. Here are the previous answers: ${interviewContext.join(
+        " "
+      )}. Please generate the next interview question.`;
+      const result = await model.generateContent(prompt);
+      const newQuestion = result.content.trim();
+
+      // Add the new question to the context
+      interviewContext.push(`Question: ${newQuestion}`);
+
+      const response = { question: newQuestion };
+      console.log("Sending response:", response);
       ws.send(JSON.stringify(response));
     } catch (error) {
       console.error("Error processing message:", error);

@@ -5,6 +5,7 @@ const Chatbot = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [jobTitle, setJobTitle] = useState("");
+  const [company, setCompany] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
   const [ws, setWs] = useState(null);
 
@@ -50,7 +51,7 @@ const Chatbot = () => {
 
   const sendMessage = (e) => {
     e.preventDefault();
-    if (!input.trim() || !jobTitle.trim()) return;
+    if (!input.trim()) return;
 
     const newMessage = {
       id: messages.length + 1,
@@ -62,7 +63,6 @@ const Chatbot = () => {
     setInput("");
 
     if (ws && ws.readyState === WebSocket.OPEN) {
-      const company = "Example Tech Inc."; // Replace with actual value if needed
       const message = { jobTitle, company, answer: input };
       console.log("Sending message:", message);
       ws.send(JSON.stringify(message));
@@ -73,13 +73,21 @@ const Chatbot = () => {
 
   const toggleChatbot = () => {
     setIsExpanded(!isExpanded);
+    const chatbot = document.getElementById("chatbot-container");
+    if (chatbot) {
+      if (isExpanded) {
+        chatbot.classList.remove("expanded");
+      } else {
+        chatbot.classList.add("expanded");
+      }
+    }
   };
 
   return (
     <>
       {!isExpanded && (
         <div id="chatbot-modal" onClick={toggleChatbot}>
-          Chat with us!
+          Click to Chat
         </div>
       )}
 
@@ -97,9 +105,16 @@ const Chatbot = () => {
             <p>Job Title:</p>
             <input
               type="text"
-              placeholder="Enter the job title..."
+              placeholder="Enter your job title..."
               value={jobTitle}
               onChange={(e) => setJobTitle(e.target.value)}
+            />
+            <p>Company:</p>
+            <input
+              type="text"
+              placeholder="Enter your company..."
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
             />
           </div>
           <div className="messages-container">
