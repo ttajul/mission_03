@@ -8,38 +8,46 @@ const Chatbot = () => {
   const [ws, setWs] = useState(null);
 
   useEffect(() => {
-    const websocket = new WebSocket("ws://localhost:8098");
-    setWs(websocket);
+    function connect() {
+      const websocket = new WebSocket("ws://localhost:8098");
+      setWs(websocket);
 
-    websocket.onopen = () => {
-      console.log("WebSocket connection established");
-    };
+      websocket.onopen = () => {
+        console.log("WebSocket connection established");
+      };
 
-    websocket.onmessage = (event) => {
-      console.log("Received data:", event.data);
-      try {
-        const data = JSON.parse(event.data);
-        if (data.question) {
-          const newMessage = {
-            id: messages.length + 1,
-            text: data.question,
-            sender: "bot",
-          };
-          console.log("Adding new message to state: ", newMessage);
-          setMessages((prevMessages) => [...prevMessages, newMessage]);
+      websocket.onmessage = (event) => {
+        console.log("Received data:", event.data);
+        try {
+          const data = JSON.parse(event.data);
+          if (data.question) {
+            const newMessage = {
+              id: messages.length + 1,
+              text: data.question,
+              sender: "bot",
+            };
+            console.log("Adding new message to state: ", newMessage);
+            setMessages((prevMessages) => [...prevMessages, newMessage]);
+          }
+        } catch (error) {
+          console.error("Error parsing message data:", error);
         }
-      } catch (error) {
-        console.error("Error parsing message data:", error);
-      }
-    };
+      };
 
-    websocket.onclose = () => {
-      console.log("WebSocket connection closed");
-    };
+      websocket.onclose = () => {
+        console.log("WebSocket connection closed. Reconnecting...");
+        setTimeout(connect, 1000); // Attempt to reconnect after 1 second
+      };
 
-    websocket.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
+      websocket.onerror = (error) => {
+        console.error("WebSocket error:", error);
+      };
+
+      return websocket;
+    }
+
+    const websocket = connect();
+    setWs(websocket);
 
     return () => {
       websocket.close();
