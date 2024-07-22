@@ -47,13 +47,13 @@ mongoose
   });
 
 // Start the server
-const PORT = process.env.PORT || 3016;
+const PORT = process.env.PORT || 3018;
 const server = app.listen(PORT, () => {
   console.log(`Server is running on port http://localhost:${PORT}`);
 });
 
 // WebSocket server setup
-const wssPort = process.env.WS_PORT || 8098;
+const wssPort = process.env.WS_PORT || 8100;
 const wss = new WebSocket.Server({ port: wssPort });
 
 wss.on("connection", (ws) => {
