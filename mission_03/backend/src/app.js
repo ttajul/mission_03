@@ -66,10 +66,9 @@ wss.on("connection", (ws) => {
       const data = JSON.parse(message);
       const { jobTitle, company, answer } = data;
 
-      // Simulating the AI response
       const generatedQuestion = `Based on your input for the ${jobTitle} at ${company}, here is a new question.`;
       const response = { question: generatedQuestion };
-      console.log("Sending response:", response);
+      console.log("Sending response:", response); // Log the response before sending
       ws.send(JSON.stringify(response));
     } catch (error) {
       console.error("Error processing message:", error);
@@ -77,8 +76,10 @@ wss.on("connection", (ws) => {
     }
   });
 
-  ws.on("close", () => {
-    console.log("WebSocket connection closed");
+  ws.on("close", (code, reason) => {
+    console.log(
+      `WebSocket connection closed. Reason: ${reason}, Code: ${code}`
+    );
   });
 
   ws.on("error", (error) => {

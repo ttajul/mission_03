@@ -4,51 +4,53 @@ import "../styles/chatbot.css";
 const Chatbot = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
   const [ws, setWs] = useState(null);
 
   useEffect(() => {
-    const websocket = new WebSocket("ws://localhost:8098");
-    setWs(websocket);
+    const connect = () => {
+      const websocket = new WebSocket("ws://localhost:8098");
+      setWs(websocket);
 
-    websocket.onopen = () => {
-      console.log("WebSocket connection established");
-    };
+      websocket.onopen = () => {
+        console.log("WebSocket connection established");
+      };
 
-    websocket.onmessage = (event) => {
-      console.log("Received data:", event.data);
-      try {
-        const data = JSON.parse(event.data);
-        if (data.question) {
-          const newMessage = {
-            id: messages.length + 1,
-            text: data.question,
-            sender: "bot",
-          };
-          console.log("Adding new message to state: ", newMessage);
-          setMessages((prevMessages) => [...prevMessages, newMessage]);
+      websocket.onmessage = (event) => {
+        console.log("Received data:", event.data); // Log raw data
+        try {
+          const data = JSON.parse(event.data);
+          if (data.question) {
+            const newMessage = {
+              id: messages.length + 1,
+              text: data.question,
+              sender: "bot",
+            };
+            console.log("Adding new message to state: ", newMessage);
+            setMessages((prevMessages) => [...prevMessages, newMessage]);
+          }
+        } catch (error) {
+          console.error("Error parsing message data:", error);
         }
-      } catch (error) {
-        console.error("Error parsing message data:", error);
-      }
+      };
+
+      websocket.onclose = () => {
+        console.log("WebSocket connection closed. Reconnecting...");
+        setTimeout(connect, 1000); // Attempt to reconnect after 1 second
+      };
+
+      websocket.onerror = (error) => {
+        console.error("WebSocket error:", error);
+      };
     };
 
-    websocket.onclose = () => {
-      console.log("WebSocket connection closed");
-    };
-
-    websocket.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
-
-    return () => {
-      websocket.close();
-    };
+    connect();
   }, [messages.length]);
 
   const sendMessage = (e) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || !jobTitle.trim()) return;
 
     const newMessage = {
       id: messages.length + 1,
@@ -60,8 +62,7 @@ const Chatbot = () => {
     setInput("");
 
     if (ws && ws.readyState === WebSocket.OPEN) {
-      const jobTitle = "Software Engineer"; // Replace with actual values
-      const company = "Example Tech Inc."; // Replace with actual values
+      const company = "Example Tech Inc."; // Replace with actual value if needed
       const message = { jobTitle, company, answer: input };
       console.log("Sending message:", message);
       ws.send(JSON.stringify(message));
@@ -72,21 +73,13 @@ const Chatbot = () => {
 
   const toggleChatbot = () => {
     setIsExpanded(!isExpanded);
-    const chatbot = document.getElementById("chatbot-container");
-    if (chatbot) {
-      if (isExpanded) {
-        chatbot.classList.remove("expanded");
-      } else {
-        chatbot.classList.add("expanded");
-      }
-    }
   };
 
   return (
     <>
       {!isExpanded && (
         <div id="chatbot-modal" onClick={toggleChatbot}>
-          Click to Chat
+          Chat with us!
         </div>
       )}
 
@@ -102,7 +95,12 @@ const Chatbot = () => {
           </div>
           <div className="chat-title">
             <p>Job Title:</p>
-            <input type="text" placeholder="Enter your job name..." />
+            <input
+              type="text"
+              placeholder="Enter the job title..."
+              value={jobTitle}
+              onChange={(e) => setJobTitle(e.target.value)}
+            />
           </div>
           <div className="messages-container">
             {messages.map((msg) => (
