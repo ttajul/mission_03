@@ -1,29 +1,57 @@
-<<<<<<< HEAD
-import { useEffect, useState } from "react";
-=======
-import { useState } from "react";
->>>>>>> main
+import { useEffect, useState, useRef } from "react";
 import "../styles/chatbot.css";
+import axios from "axios";
 
 const Chatbot = () => {
-  const [messages, setMessages] = useState([]);
+  const [userMessages, setUserMessages] = useState([]);
+  const [aiMessages, setAiMessages] = useState([]);
+  const [jobTitle, setJobTitle] = useState("");
   const [input, setInput] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
+  const messagesEndRef = useRef(null);
 
-  const sendMessage = (e) => {
-    e.preventDefault();
-    if (!input.trim()) return;
-    const newMessage = {
-      id: messages.length + 1,
-      text: input,
-      sender: "user",
-    };
-    setMessages([...messages, newMessage]);
-    setInput("");
-
-    // Here you could also integrate with a backend service to get a response
+  //update job title on change
+  const handleJobTitleChange = (e) => {
+    setJobTitle(e.target.value);
   };
 
+  // Function to send message to chatbot
+  const sendMessage = (e) => {
+    e.preventDefault();
+    console.log(jobTitle);
+    console.log("Click button ran here!");
+    if (!input.trim()) return;
+
+    // Add user message to state and clear input field
+    const newUserMessage = {
+      sender: "user",
+      text: input,
+      timestamp: Date.now(),
+    };
+    const newUserMessages = [...userMessages, newUserMessage];
+    setUserMessages(newUserMessages);
+    setInput("");
+
+    //send jobtitle and user message to backend
+    const payload = {
+      jobTitle: jobTitle,
+      userMessages: input,
+    };
+    axios
+      .post("http://localhost:3000/chatbot", payload)
+      .then((res) => {
+        const newAiMessage = {
+          sender: "ai",
+          text: res.data,
+          timestamp: Date.now(),
+        };
+        const newAiMessages = [...aiMessages, newAiMessage];
+        setAiMessages(newAiMessages);
+      })
+      .catch((err) => console.log(err));
+  };
+
+  // Function to toggle chatbot
   const toggleChatbot = () => {
     setIsExpanded(!isExpanded);
     const chatbot = document.getElementById("chatbot-container");
@@ -34,6 +62,15 @@ const Chatbot = () => {
     }
   };
 
+  //combine messages
+  const combinedMessages = [...userMessages, ...aiMessages].sort(
+    (a, b) => a.timestamp - b.timestamp
+  );
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [combinedMessages]);
   return (
     <>
       {!isExpanded && (
@@ -54,15 +91,21 @@ const Chatbot = () => {
           </div>
           <div className="chat-title">
             <p>Job Title:</p>
-            <input type="text" placeholder="Enter your job name..." />
+            <input
+              type="text"
+              placeholder="Enter your job name..."
+              value={jobTitle}
+              onChange={handleJobTitleChange}
+            />
           </div>
           {/* Render messages and input field for new messages here */}
           <div className="messages-container">
-            {messages.map((msg) => (
-              <div key={msg.id} className={`message ${msg.sender}`}>
-                {msg.text}
+            {combinedMessages.map((message, index) => (
+              <div key={index} className={`${message.sender}-message`}>
+                {message.text}
               </div>
             ))}
+            <div ref={messagesEndRef} />
           </div>
           <div className="submit-message">
             <input

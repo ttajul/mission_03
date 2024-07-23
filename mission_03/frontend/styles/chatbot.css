@@ -45,8 +45,15 @@
 }
 
 .messages-container {
-  flex-grow: 1;
-  overflow-y: auto; /* Allows scrolling for overflow content */
+  flex-grow: 1; /* Allows scrolling for overflow content */
+  height: 300px; /* Adjust based on your preference */
+  overflow-y: auto; /* Makes it scrollable */
+  border: 1px solid #ccc; /* Adds a border around the chat messages */
+  padding: 10px;
+  background-color: #f9f9f9; /* Light background for the chat area */
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
 .chat-title {
@@ -70,12 +77,24 @@
   padding: 8px 12px;
 }
 
-/* Assuming you have a way to differentiate between incoming and outgoing messages, e.g., an additional class */
-.message.user {
-  text-align: right;
-  background-color: #dcf8c6; /* Light green background for user messages */
-  margin-left: auto; /* Aligns the message to the right */
-  border-bottom-right-radius: 2px; /* Adjusts the border-radius for the "tail" */
+.user-message {
+  align-self: flex-end; /* Align user messages to the right */
+  background-color: #e1f5fe;
+  color: black;
+  margin: 5px;
+  padding: 10px;
+  border-radius: 10px;
+  max-width: 80%;
+}
+
+.ai-message {
+  align-self: flex-start; /* Align AI messages to the left */
+  background-color: #f0f0f0;
+  color: black;
+  margin: 5px;
+  padding: 10px;
+  border-radius: 10px;
+  max-width: 80%;
 }
 
 form {

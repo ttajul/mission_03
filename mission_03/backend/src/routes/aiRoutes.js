@@ -1,8 +1,8 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const aiController = require('../controllers/aiController');
+const aiController = require("../controllers/aiController");
 
-router.post('/question', aiController.generateInterviewQuestions);
-router.post('/feedback', aiController.getFeedbackOnAnswer); 
+//print req.body
+router.post("/chatbot", aiController.getHelloGreeting);
 
-module.exports = router;
+module.exports = { router };
