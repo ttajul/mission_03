@@ -50,13 +50,13 @@ mongoose
   });
 
 // Start the server
-const PORT = process.env.PORT || 3026;
+const PORT = process.env.PORT || 3027;
 const server = app.listen(PORT, () => {
   console.log(`Server is running on port http://localhost:${PORT}`);
 });
 
 // WebSocket server setup
-const wssPort = process.env.WS_PORT || 8107;
+const wssPort = process.env.WS_PORT || 8108;
 const wss = new WebSocket.Server({ port: wssPort });
 
 wss.on("connection", (ws) => {
@@ -70,13 +70,13 @@ wss.on("connection", (ws) => {
     try {
       const data = JSON.parse(message);
       console.log("Parsed data:", data);
-      const { jobTitle, company, answer } = data;
+      const { name, jobTitle, company, answer, date } = data;
 
       // Add the user's answer to the context
       interviewContext.push(`Answer: ${answer}`);
 
       // Generate the new question using AI service
-      const prompt = `You are interviewing for a ${jobTitle} position at ${company}. Here are the previous answers: ${interviewContext.join(
+      const prompt = `You are interviewing ${name} for a ${jobTitle} position at ${company} on ${date}. Here are the previous answers: ${interviewContext.join(
         " "
       )}. Please generate the next interview question.`;
       console.log("AI prompt:", prompt);
@@ -103,12 +103,20 @@ wss.on("connection", (ws) => {
 
           // Save the question and answer to the database
           const interviewEntry = new Interview({
+            name,
             jobTitle,
             company,
             question: newQuestion,
             answer,
+            date,
           });
-          await interviewEntry.save();
+
+          try {
+            await interviewEntry.save();
+            console.log("Interview entry saved:", interviewEntry);
+          } catch (error) {
+            console.error("Error saving interview entry:", error);
+          }
 
           const response = { question: newQuestion };
           console.log("Sending response:", response);

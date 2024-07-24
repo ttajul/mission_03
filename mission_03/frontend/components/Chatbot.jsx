@@ -4,6 +4,7 @@ import "../styles/chatbot.css";
 const Chatbot = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const [name, setName] = useState("");
   const [jobTitle, setJobTitle] = useState("");
   const [company, setCompany] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
@@ -11,7 +12,7 @@ const Chatbot = () => {
 
   useEffect(() => {
     const connect = () => {
-      const websocket = new WebSocket("ws://localhost:8107");
+      const websocket = new WebSocket("ws://localhost:8108");
       setWs(websocket);
 
       websocket.onopen = () => {
@@ -24,9 +25,10 @@ const Chatbot = () => {
           const data = JSON.parse(event.data);
           if (data.question) {
             const newMessage = {
-              id: Date.now(), // Generate a unique key based on timestamp
+              id: messages.length + 1,
               text: data.question,
               sender: "bot",
+              key: `${Date.now()}-bot`,
             };
             console.log("Adding new message to state: ", newMessage);
             setMessages((prevMessages) => [...prevMessages, newMessage]);
@@ -51,19 +53,22 @@ const Chatbot = () => {
 
   const sendMessage = (e) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || !jobTitle.trim() || !company.trim() || !name.trim())
+      return;
 
     const newMessage = {
-      id: Date.now(), // Generate a unique key based on timestamp
+      id: messages.length + 1,
       text: input,
       sender: "user",
+      key: `${Date.now()}-user`,
     };
     console.log("Sending new message to state: ", newMessage);
     setMessages([...messages, newMessage]);
     setInput("");
 
     if (ws && ws.readyState === WebSocket.OPEN) {
-      const message = { jobTitle, company, answer: input };
+      const date = new Date().toISOString();
+      const message = { name, jobTitle, company, answer: input, date };
       console.log("Sending message:", message);
       ws.send(JSON.stringify(message));
     } else {
@@ -102,6 +107,13 @@ const Chatbot = () => {
             </div>
           </div>
           <div className="chat-title">
+            <p>Name:</p>
+            <input
+              type="text"
+              placeholder="Enter your name..."
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
             <p>Job Title:</p>
             <input
               type="text"
@@ -119,7 +131,7 @@ const Chatbot = () => {
           </div>
           <div className="messages-container">
             {messages.map((msg) => (
-              <div key={msg.id} className={`message ${msg.sender}`}>
+              <div key={msg.key} className={`message ${msg.sender}`}>
                 {msg.text}
               </div>
             ))}

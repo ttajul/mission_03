@@ -13,7 +13,6 @@ const userSchema = new mongoose.Schema({
 
 module.exports = mongoose.model("User", userSchema);
 
-
 // these code to store the output (answer and feedback to database)
 // const interviewSchema = new mongoose.Schema({
 //   jobTitle: String,

@@ -14,6 +14,24 @@
       <div class="form-group">
         <input
           type="text"
+          id="nameInput"
+          class="form-control"
+          placeholder="Your Name"
+        />
+        <input
+          type="text"
+          id="jobTitleInput"
+          class="form-control"
+          placeholder="Job Title"
+        />
+        <input
+          type="text"
+          id="companyInput"
+          class="form-control"
+          placeholder="Company"
+        />
+        <input
+          type="text"
           id="messageInput"
           class="form-control"
           placeholder="Type a message"
@@ -27,7 +45,7 @@
       let ws;
 
       function connect() {
-        ws = new WebSocket("ws://localhost:8107"); // Ensure this port matches your WebSocket server port
+        ws = new WebSocket("ws://localhost:8108");
 
         ws.onopen = () => {
           document.getElementById("status").innerText = "Connected";
@@ -46,7 +64,7 @@
           document.getElementById("status").innerText =
             "Disconnected. Reconnecting...";
           document.getElementById("status").className = "alert alert-warning";
-          setTimeout(connect, 1000); // Attempt to reconnect after 1 second
+          setTimeout(connect, 1000);
         };
 
         ws.onerror = (error) => {
@@ -58,17 +76,23 @@
       }
 
       function sendMessage() {
-        const input = document.getElementById("messageInput");
-        const message = input.value;
+        const name = document.getElementById("nameInput").value;
+        const jobTitle = document.getElementById("jobTitleInput").value;
+        const company = document.getElementById("companyInput").value;
+        const answer = document.getElementById("messageInput").value;
+        const date = new Date().toISOString(); // Add the current date
+
         const jsonMessage = JSON.stringify({
-          jobTitle: "Engineer",
-          company: "Tech Co",
-          answer: message,
+          name,
+          jobTitle,
+          company,
+          answer,
+          date, // Include the date in the message
         });
 
         if (ws.readyState === WebSocket.OPEN) {
           ws.send(jsonMessage);
-          input.value = "";
+          document.getElementById("messageInput").value = "";
 
           const messageContainer = document.getElementById("messages");
           const newMessage = document.createElement("div");
@@ -80,7 +104,6 @@
         }
       }
 
-      // Establish the WebSocket connection
       connect();
     </script>
   </body>
