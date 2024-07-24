@@ -11,7 +11,7 @@ const Chatbot = () => {
 
   useEffect(() => {
     const connect = () => {
-      const websocket = new WebSocket("ws://localhost:8098");
+      const websocket = new WebSocket("ws://localhost:8107");
       setWs(websocket);
 
       websocket.onopen = () => {
@@ -24,7 +24,7 @@ const Chatbot = () => {
           const data = JSON.parse(event.data);
           if (data.question) {
             const newMessage = {
-              id: messages.length + 1,
+              id: Date.now(), // Generate a unique key based on timestamp
               text: data.question,
               sender: "bot",
             };
@@ -54,7 +54,7 @@ const Chatbot = () => {
     if (!input.trim()) return;
 
     const newMessage = {
-      id: messages.length + 1,
+      id: Date.now(), // Generate a unique key based on timestamp
       text: input,
       sender: "user",
     };

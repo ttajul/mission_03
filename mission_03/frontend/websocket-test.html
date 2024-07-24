@@ -27,7 +27,7 @@
       let ws;
 
       function connect() {
-        ws = new WebSocket("ws://localhost:8098"); // Ensure this port matches your WebSocket server port
+        ws = new WebSocket("ws://localhost:8107"); // Ensure this port matches your WebSocket server port
 
         ws.onopen = () => {
           document.getElementById("status").innerText = "Connected";

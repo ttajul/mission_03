@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const User = require("../models/user"); // Adjust the path as needed
-const aiService = require("../services/aiservice.js"); // Ensure this path is correct
+const User = require("../models/user");
+const Interview = require("../models/interview");
+const aiService = require("../services/aiservice.js");
 
 // Define your routes here
 router.post("/register", async (req, res) => {
@@ -24,7 +25,7 @@ router.post("/login", async (req, res) => {
   if (!user) {
     return res.status(404).send({ message: "User not found" });
   }
-  const isMatch = password === user.password; // Simple comparison for demonstration; use hashing in production
+  const isMatch = password === user.password;
   if (!isMatch) {
     return res.status(401).send({ message: "Invalid credentials" });
   }
@@ -49,6 +50,16 @@ router.post("/ai/generate-question", async (req, res) => {
     res.send({ question });
   } catch (err) {
     res.status(500).send({ message: "Internal server error" });
+  }
+});
+
+// New route to get all interview data
+router.get("/interviews", async (req, res) => {
+  try {
+    const interviews = await Interview.find();
+    res.json(interviews);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch interview data" });
   }
 });
 

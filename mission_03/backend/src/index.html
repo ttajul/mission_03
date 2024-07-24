@@ -1,44 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Interview Simulator</title>
-</head>
-<body>
-  <div id="interview-container">
-    </div>
-  <script>
-    const ws = new WebSocket('ws://localhost:8080'); // Connect to WebSocket server
+  <head>
+    <meta charset="UTF-8" />
+    <title>Interview Simulator</title>
+  </head>
+  <body>
+    <div id="interview-container"></div>
+    <script>
+      const ws = new WebSocket("ws://localhost:8105"); // Connect to WebSocket server
 
-    const interviewContainer = document.getElementById('interview-container');
+      const interviewContainer = document.getElementById("interview-container");
 
-    // Function to display a question
-    function displayQuestion(question) {
-      interviewContainer.innerHTML = `
+      // Function to display a question
+      function displayQuestion(question) {
+        interviewContainer.innerHTML = `
         <h2>${question}</h2>
         <input type="text" id="answer-input" placeholder="Enter your answer">
         <button onclick="submitAnswer()">Submit Answer</button>
       `;
-    }
-
-    // Function to submit an answer
-    function submitAnswer() {
-      const answer = document.getElementById('answer-input').value;
-      const jobTitle = 'Software Engineer'; // Replace with actual values
-      const company = 'Example Tech Inc.'; // Replace with actual values
-
-      ws.send(JSON.stringify({ jobTitle, company, answer }));
-    }
-
-    // Handle messages from the server
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.question) {
-        displayQuestion(data.question);
-      } else if (data.message) {
-        interviewContainer.innerHTML = `<h2>${data.message}</h2>`;
       }
-    };
-  </script>
-</body>
+
+      // Function to submit an answer
+      function submitAnswer() {
+        const answer = document.getElementById("answer-input").value;
+        const jobTitle = "Software Engineer"; // Replace with actual values
+        const company = "Example Tech Inc."; // Replace with actual values
+
+        ws.send(JSON.stringify({ jobTitle, company, answer }));
+      }
+
+      // Handle messages from the server
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.question) {
+          displayQuestion(data.question);
+        } else if (data.message) {
+          interviewContainer.innerHTML = `<h2>${data.message}</h2>`;
+        }
+      };
+    </script>
+  </body>
 </html>
