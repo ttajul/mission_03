@@ -1,6 +1,7 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 require("dotenv").config(); // Load environment variables
-console.log(process.env.API_KEY);
+
+
 const genAI = new GoogleGenerativeAI(process.env.API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
@@ -24,6 +25,7 @@ const generateInterviewQuestions = async (req, res) => {
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = await response.text();
+
 
     // Send the question to the frontend
     res.send(text);
@@ -49,5 +51,7 @@ const getFeedbackOnAnswer = async (req, res) => {
 module.exports = {
   generateInterviewQuestions,
   getFeedbackOnAnswer,
+
   getHelloGreeting,
+
 };

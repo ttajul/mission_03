@@ -1,22 +1,28 @@
 const express = require("express");
 
-const aiRoutes = require("./routes/aiRoutes");
 
-const bodyParser = require("body-parser");
-const cors = require("cors");
+const aiRoutes = require("./src/routes/aiRoutes");
+
+const bodyParser = require('body-parser');
+const cors = require('cors');
+
 const app = express();
 require("dotenv").config();
 const WebSocket = require("ws");
 const wss = new WebSocket.Server({ port: 8080 });
 
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const { getHelloGreeting } = require("./controllers/aiController");
+
+const { getHelloGreeting } = require("./src/controllers/aiController");
+
 
 const genAI = new GoogleGenerativeAI(process.env.API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 // Middleware
 app.use(express.json());
+
+app.use("/api", aiRoutes);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -48,3 +54,4 @@ const PORT = 3000; // Ensure this is set to 3000
 app.listen(PORT, () => {
   console.log(`Server is running on port http://localhost:${PORT}`);
 });
+

@@ -1,4 +1,6 @@
+
 import { useEffect, useState, useRef } from "react";
+
 import "../styles/chatbot.css";
 import axios from "axios";
 
@@ -8,7 +10,10 @@ const Chatbot = () => {
   const [aiMessages, setAiMessages] = useState([]);
   const [jobTitle, setJobTitle] = useState("");
   const [input, setInput] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
+  const [company, setCompany] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
+
   const messagesEndRef = useRef(null);
   const [questionCount, setQuestionCount] = useState(0);
 
@@ -29,14 +34,17 @@ const Chatbot = () => {
     console.log("Click button ran here!");
     if (!input.trim()) return;
 
+
     //add question count
     setQuestionCount(questionCount + 1);
     // Add user message to state and clear input field
     const newUserMessage = {
+
       sender: "user",
       text: input,
       timestamp: Date.now(),
     };
+
     const newUserMessages = [...userMessages, newUserMessage];
     setUserMessages(newUserMessages);
     setInput("");
@@ -114,6 +122,7 @@ const Chatbot = () => {
           ]);
         })
         .catch((err) => console.log(err));
+
     }
   };
 
@@ -121,10 +130,12 @@ const Chatbot = () => {
   const toggleChatbot = () => {
     setIsExpanded(!isExpanded);
     const chatbot = document.getElementById("chatbot-container");
-    if (isExpanded) {
-      chatbot.classList.remove("expanded");
-    } else {
-      chatbot.classList.add("expanded");
+    if (chatbot) {
+      if (isExpanded) {
+        chatbot.classList.remove("expanded");
+      } else {
+        chatbot.classList.add("expanded");
+      }
     }
   };
 
@@ -161,7 +172,7 @@ const Chatbot = () => {
       )}
 
       {isExpanded && (
-        <div className="chatbot-container expanded">
+        <div id="chatbot-container" className="chatbot-container expanded">
           <div className="chat-header">
             <span>Chat with us!</span>
             <div className="control-buttons">
@@ -174,12 +185,13 @@ const Chatbot = () => {
             <p>Job Title:</p>
             <input
               type="text"
+
               placeholder="Enter your job name..."
               value={jobTitle}
               onChange={handleJobTitleChange}
+
             />
           </div>
-          {/* Render messages and input field for new messages here */}
           <div className="messages-container">
             {initialPrompt && <div className="ai-message">{initialPrompt}</div>}
             {combinedMessages.map((message, index) => (
