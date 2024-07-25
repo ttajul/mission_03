@@ -2,7 +2,11 @@ const express = require("express");
 const router = express.Router();
 const aiController = require("../controllers/aiController");
 
-router.post("/generate-question", aiController.generateInterviewQuestions);
-router.post("/get-feedback", aiController.getFeedbackOnAnswer);
 
-module.exports = router;
+//print req.body
+router.post("/chatbot", aiController.getHelloGreeting);
+router.post("/generateInterviewQuestions", aiController.generateInterviewQuestions);
+router.post("/getFeedbackOnAnswer", aiController.getFeedbackOnAnswer);
+
+module.exports = { router };
+

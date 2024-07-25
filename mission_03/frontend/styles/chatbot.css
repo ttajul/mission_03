@@ -61,8 +61,18 @@
   margin-bottom: 10px;
 }
 
-.chat-title p {
-  margin: 0 0 5px 0;
+
+.messages-container {
+  flex-grow: 1; /* Allows scrolling for overflow content */
+  height: 300px; /* Adjust based on your preference */
+  overflow-y: auto; /* Makes it scrollable */
+  border: 1px solid #ccc; /* Adds a border around the chat messages */
+  padding: 10px;
+  background-color: #f9f9f9; /* Light background for the chat area */
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
 }
 
 .chat-title input {
@@ -83,15 +93,25 @@
   margin-bottom: 10px;
 }
 
-.message.user {
-  background-color: #007bff;
-  color: white;
-  align-self: flex-end;
+
+.user-message {
+  align-self: flex-end; /* Align user messages to the right */
+  background-color: #e1f5fe;
+  color: black;
+  margin: 5px;
+  padding: 10px;
+  border-radius: 10px;
+  max-width: 80%;
 }
 
-.message.bot {
+.ai-message {
+  align-self: flex-start; /* Align AI messages to the left */
   background-color: #f0f0f0;
-  align-self: flex-start;
+  color: black;
+  margin: 5px;
+  padding: 10px;
+  border-radius: 10px;
+  max-width: 80%;
 }
 
 .submit-message {

@@ -1,78 +1,132 @@
-import React, { useState, useEffect } from "react";
+
+import { useEffect, useState, useRef } from "react";
+
 import "../styles/chatbot.css";
+import axios from "axios";
 
 const Chatbot = () => {
-  const [messages, setMessages] = useState([]);
+  const [initialPrompt, setInitialPrompt] = useState([]);
+  const [userMessages, setUserMessages] = useState([]);
+  const [aiMessages, setAiMessages] = useState([]);
+  const [jobTitle, setJobTitle] = useState("");
   const [input, setInput] = useState("");
   const [jobTitle, setJobTitle] = useState("");
   const [company, setCompany] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
-  const [ws, setWs] = useState(null);
 
-  useEffect(() => {
-    const websocket = new WebSocket("ws://localhost:8098");
-    setWs(websocket);
+  const messagesEndRef = useRef(null);
+  const [questionCount, setQuestionCount] = useState(0);
 
-      websocket.onopen = () => {
-        console.log("WebSocket connection established");
-      };
+  //combine messages from user and ai
+  let [combinedMessages, setCombinedMessages] = useState([
+    { sender: "bot", text: "Tell me about yourself." },
+  ]);
 
-    websocket.onmessage = (event) => {
-      console.log("Received data:", event.data);
-      try {
-        const data = JSON.parse(event.data);
-        if (data.question) {
-          const newMessage = {
-            id: messages.length + 1,
-            text: data.question,
-            sender: "bot",
-          };
-          console.log("Adding new message to state: ", newMessage);
-          setMessages((prevMessages) => [...prevMessages, newMessage]);
-        }
-      } catch (error) {
-        console.error("Error parsing message data:", error);
-      }
-    };
+  //update job title on change
+  const handleJobTitleChange = (e) => {
+    setJobTitle(e.target.value);
+  };
 
-      websocket.onclose = () => {
-        console.log("WebSocket connection closed. Reconnecting...");
-        setTimeout(connect, 1000); // Attempt to reconnect after 1 second
-      };
-
-    websocket.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
-
-    return () => {
-      websocket.close();
-    };
-
-    connect();
-  }, [messages.length]);
-
+  // Function to send message to chatbot
   const sendMessage = (e) => {
     e.preventDefault();
+    console.log(jobTitle);
+    console.log("Click button ran here!");
     if (!input.trim()) return;
 
-    const newMessage = {
-      id: messages.length + 1,
-      text: input,
+
+    //add question count
+    setQuestionCount(questionCount + 1);
+    // Add user message to state and clear input field
+    const newUserMessage = {
+
       sender: "user",
+      text: input,
+      timestamp: Date.now(),
     };
-    console.log("Sending new message to state: ", newMessage);
-    setMessages([...messages, newMessage]);
+
+    const newUserMessages = [...userMessages, newUserMessage];
+    setUserMessages(newUserMessages);
     setInput("");
 
-    if (ws && ws.readyState === WebSocket.OPEN) {
-      const message = { jobTitle, company, answer: input };
-      console.log("Sending message:", message);
-      ws.send(JSON.stringify(message));
-    } else {
-      console.error("WebSocket is not open. ReadyState: " + ws.readyState);
+    //send jobtitle and user message to backend
+    const payload = {
+      jobTitle: jobTitle,
+      userMessages: input,
+    };
+
+    // Send user message to backend using Fetch API
+    //add while loop to generate 6 questions
+    if (questionCount < 6) {
+      fetch("http://localhost:3000/generateInterviewQuestions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      })
+        .then((response) => response.text())
+        .then((question) => {
+          const newAiMessage = {
+            sender: "ai",
+            text: question,
+            timestamp: Date.now(),
+          };
+          setAiMessages((prevAiMessages) => [...prevAiMessages, newAiMessage]);
+        })
+        .catch((err) => console.log(err));
+    } else if (questionCount === 6) {
+      const newAiMessage = {
+        sender: "ai",
+        text: "Thank you for chatting with me! I will now provide your feedback.",
+        timestamp: Date.now(),
+      };
+      setAiMessages((prevAiMessages) => [...prevAiMessages, newAiMessage]);
+
+      //send jobtitle and user message to backend
+      // Combine all user messages into a single string
+      const combinedUserMessages = userMessages.reduce(
+        (acc, message) => acc + " " + message.text,
+        ""
+      );
+
+      // Send combined user messages to getFeedbackOnAnswer endpoint
+      fetch("http://localhost:3000/getFeedbackOnAnswer", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userMessages: combinedUserMessages }),
+      })
+        .then((response) => {
+          // Check if the response is JSON
+          const contentType = response.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            return response.json();
+          } else {
+            return response.text();
+          }
+        })
+        .then((feedback) => {
+          const feedbackMessage = {
+            sender: "ai",
+            text:
+              typeof feedback === "string"
+                ? feedback
+                : JSON.stringify(feedback),
+            timestamp: Date.now(),
+          };
+          setAiMessages((prevAiMessages) => [
+            ...prevAiMessages,
+            feedbackMessage,
+          ]);
+        })
+        .catch((err) => console.log(err));
+
     }
   };
 
+  // Function to toggle chatbot modal
   const toggleChatbot = () => {
     setIsExpanded(!isExpanded);
     const chatbot = document.getElementById("chatbot-container");
@@ -85,6 +139,30 @@ const Chatbot = () => {
     }
   };
 
+  //combine messages
+  combinedMessages = [...userMessages, ...aiMessages].sort(
+    (a, b) => a.timestamp - b.timestamp
+  );
+
+  const fetchGreetings = async () => {
+    try {
+      const response = await axios.post("http://localhost:3000/chatbot", {
+        userMessages: `Generate an interview question for a ${jobTitle} position. Start with "Tell me about yourself."`,
+      });
+      setInitialPrompt(response.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchGreetings();
+  }, []);
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [combinedMessages]);
   return (
     <>
       {!isExpanded && (
@@ -107,24 +185,21 @@ const Chatbot = () => {
             <p>Job Title:</p>
             <input
               type="text"
-              placeholder="Enter your job title..."
+
+              placeholder="Enter your job name..."
               value={jobTitle}
-              onChange={(e) => setJobTitle(e.target.value)}
-            />
-            <p>Company:</p>
-            <input
-              type="text"
-              placeholder="Enter your company..."
-              value={company}
-              onChange={(e) => setCompany(e.target.value)}
+              onChange={handleJobTitleChange}
+
             />
           </div>
           <div className="messages-container">
-            {messages.map((msg) => (
-              <div key={msg.id} className={`message ${msg.sender}`}>
-                {msg.text}
+            {initialPrompt && <div className="ai-message">{initialPrompt}</div>}
+            {combinedMessages.map((message, index) => (
+              <div key={index} className={`${message.sender}-message`}>
+                {message.text}
               </div>
             ))}
+            <div ref={messagesEndRef} />
           </div>
           <div className="submit-message">
             <input
